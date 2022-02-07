@@ -34,7 +34,7 @@ if not IMAGE_PATH.exists():
 
 if not FONT_FILE.exists():
     font_req = requests.get(font_url)
-    with open(FONT_FILE, "wb") as file:
+    with open(FONT_ZIP, "wb") as file:
         file.write(font_req.content)
         logger.info("字体文件下载成功")
         with ZipFile(FONT_ZIP) as zipfile:

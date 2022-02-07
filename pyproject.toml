@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "nonebot-plugin-txt2img"
+version = "0.1.0"
+description = "轻量文字转图片插件"
+authors = ["mobyw <mobyw66@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/mobyw/nonebot-plugin-txt2img"
+repository = "https://github.com/mobyw/nonebot-plugin-txt2img"
+documentation = "https://github.com/mobyw/nonebot-plugin-txt2img/blob/main/README.md"
+keywords = ["nonebot2", "qq", "plugin"]
+
+[tool.poetry.dependencies]
+python = "^3.7.3"
+nonebot2 = "2.0.0-beta.1"
+nonebot-adapter-onebot = "2.0.0-beta.1"
+pillow = "^9.0.0"
+
+[tool.poetry.dev-dependencies]
+nb-cli = "^0.6.4"
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

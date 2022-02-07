@@ -37,9 +37,10 @@ if not FONT_FILE.exists():
     with open(FONT_ZIP, "wb") as file:
         file.write(font_req.content)
         logger.info("字体文件下载成功")
-        with ZipFile(FONT_ZIP) as zipfile:
-            zipfile.extractall()
-            logger.info("字体文件解压成功")
+        with ZipFile(FONT_ZIP, 'r') as zipfile:
+            for name in zipfile.namelist():
+                zipfile.extract(name, FONT_PATH)
+        logger.info("字体文件解压成功")
 else:
     logger.info("字体文件已存在")
 

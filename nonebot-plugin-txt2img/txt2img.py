@@ -50,7 +50,7 @@ class Txt2Img:
 
         user_font = ImageFont.truetype(self.font_family, self.user_font_size)
         lyric_font = ImageFont.truetype(self.font_family, self.lrc_font_size)
-        
+
         if title == ' ':
             title = ''
 

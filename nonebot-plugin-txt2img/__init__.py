@@ -17,11 +17,12 @@ async def txt2img_handle(
     size: str = ArgPlainText("SIZE")
 ):
     if size.isdigit():
-        font_size = int(size)
-        if title == ' ':
-            title = ''
-        img = Txt2Img(font_size)
-        pic = img.save(title, text)
-        await txt2img.finish(MessageSegment.image(pic))  # type: ignore
+        if 10 <= int(size) <= 120:
+            font_size = int(size)
+            img = Txt2Img(font_size)
+            pic = img.save(title, text)
+            await txt2img.finish(MessageSegment.image(pic))  # type: ignore
+        else:
+            await txt2img.finish("字体大小需要在10到120之间！")  # type: ignore
     else:
         await txt2img.finish("字体大小格式有误，请输入数字！")  # type: ignore

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-txt2img"
-version = "0.1.0"
+version = "0.1.1"
 description = "轻量文字转图片插件"
 authors = ["mobyw <mobyw66@gmail.com>"]
 license = "MIT"
@@ -10,7 +10,7 @@ repository = "https://github.com/mobyw/nonebot-plugin-txt2img"
 documentation = "https://github.com/mobyw/nonebot-plugin-txt2img/blob/main/README.md"
 keywords = ["nonebot2", "qq", "plugin"]
 packages = [
-    { include = "nonebot-plugin-txt2img" }
+    { include = "nonebot_plugin_txt2img" }
 ]
 
 [tool.poetry.dependencies]

@@ -37,15 +37,21 @@ _✨ 轻量文字转图片插件 ✨_
 
 ### 安装 nonebot-plugin-txt2img
 
-使用 `pip` 安装：
+#### 使用 `nb-cli` 安装
+
+```bash
+nb plugin install nonebot-plugin-txt2img
+```
+
+#### 使用 `pip` 安装
 
 ```bash
 pip install nonebot-plugin-txt2img
 ```
 
-在 `bot.py` 文件添加以下代码加载插件：
+需要在 `bot.py` 文件添加以下代码加载插件：
 
-```
+```python
 nonebot.load_plugin("nonebot_plugin_txt2img")
 ```
 
@@ -60,6 +66,28 @@ nonebot.load_plugin("nonebot_plugin_txt2img")
 * 标题：以 `1.5` 倍字体大小排版在首行居中位置。
 * 内容：以 `1` 倍字体大小左对齐排版。
 * 字体大小：位于 `10~120` 之间的数字。
+
+## 跨插件使用
+
+如需在其他插件中使用文本转图片功能，可以从本插件导入。
+
+导入方式：
+
+```python
+from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot_plugin_txt2img import Txt2Img
+```
+
+使用方式：
+
+```python
+font_size = 32
+title = '标题'
+text = '正文内容'
+img = Txt2Img(font_size)
+pic = img.save(title, text)
+msg = MessageSegment.image(pic)
+```
 
 ## 项目致谢
 

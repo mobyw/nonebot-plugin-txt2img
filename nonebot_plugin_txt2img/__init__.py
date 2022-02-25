@@ -1,9 +1,22 @@
-from nonebot import on_command
+from nonebot import get_driver, on_command
 from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.log import logger
 from nonebot.params import ArgPlainText
 from nonebot.rule import to_me
 
+from .config import check_path, download_template
 from .txt2img import Txt2Img
+
+driver = get_driver()
+
+
+@driver.on_startup
+async def startup():
+    logger.info("Initialing plugin txt2img")
+    if not check_path():
+        await download_template()
+        logger.info("Success to download txt2img template")
+
 
 txt2img = on_command("txt2img", rule=to_me())
 
@@ -14,7 +27,7 @@ txt2img = on_command("txt2img", rule=to_me())
 async def txt2img_handle(
     title: str = ArgPlainText("TITLE"),
     text: str = ArgPlainText("TEXT"),
-    size: str = ArgPlainText("SIZE")
+    size: str = ArgPlainText("SIZE"),
 ):
     if size.isdigit():
         if 10 <= int(size) <= 120:

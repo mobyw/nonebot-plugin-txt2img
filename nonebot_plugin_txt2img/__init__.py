@@ -2,10 +2,18 @@ from nonebot import get_driver, on_command
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.log import logger
 from nonebot.params import ArgPlainText
+from nonebot.plugin import PluginMetadata
 from nonebot.rule import to_me
 
 from .config import check_path, download_template
 from .txt2img import Txt2Img
+
+__plugin_meta__ = PluginMetadata(
+    name="轻量文字转图片插件",
+    description="使用 Pillow 进行文字转图片",
+    usage="""发送 txt2img 即可交互进行文字转图片""",
+    extra={"version": "0.1.3"},
+)
 
 driver = get_driver()
 

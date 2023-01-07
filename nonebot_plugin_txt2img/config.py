@@ -16,7 +16,7 @@ FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
 BACKGROUND_FILE = IMAGE_PATH / "background.png"
 BANNER_FILE = IMAGE_PATH / "banner.png"
 
-data_url = "https://raw.fastgit.org/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
+data_url = "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
 font_url = data_url + "/font/sarasa-mono-sc-regular.zip"
 background_url = data_url + "/image/background.png"
 banner_url = data_url + "/image/banner.png"
@@ -31,8 +31,10 @@ def check_path() -> bool:
         flag = False
     if not FONT_PATH.exists():
         FONT_PATH.mkdir(parents=True, exist_ok=True)
+        flag = False
     if not IMAGE_PATH.exists():
         IMAGE_PATH.mkdir(parents=True, exist_ok=True)
+        flag = False
     return flag
 
 
@@ -55,19 +57,36 @@ async def download_template():
                         async for chunk in response.aiter_bytes():
                             await file.write(chunk)
             return True
-        except:
-            logger.warning("Download failed")
+        except Exception as e:
+            logger.warning(f"Download failed: {e}")
             return False
+    
+    failed = False
 
     # download font
-    await download(font_url, FONT_ZIP)
-    logger.info("Download font successful")
-    await unarchive_file(FONT_ZIP)
+    if (await download(font_url, FONT_ZIP)):
+        logger.info("Download font successful")
+        try:
+            await unarchive_file(FONT_ZIP)
+        except Exception as e:
+            logger.warning(f"Unzip failed: {e}")
+            failed = True
+    else:
+        failed = True
 
     # download background
-    await download(background_url, BACKGROUND_FILE)
-    logger.info("Download background successful")
+    if (await download(background_url, BACKGROUND_FILE)):
+        logger.info("Download background successful")
+    else:
+        failed = True
 
     # download banner
-    await download(banner_url, BANNER_FILE)
-    logger.info("Download banner successful")
+    if (await download(banner_url, BANNER_FILE)):
+        logger.info("Download banner successful")
+    else:
+        failed = True
+
+    if failed:
+        logger.warning("The resource is not fully downloaded.")
+        logger.warning("Please manually copy the resource file.")
+        logger.warning(f"Resource path: {DATA_PATH}")

@@ -23,9 +23,7 @@ _✨ 轻量文字转图片插件 ✨_
 
 ## 简介
 
-**请注意：此插件仅适配 nonebot2 2.0.0b1 及以上。**
-
-本插件由使用 `PIL` 库将纯文字消息转为图片，启动时会检测所需资源是否存在，若不存在会自动下载到对应位置。生成的图片以 `base64` 格式发送，不保存到磁盘。
+本插件由使用 `PIL(Pillow)` 库将纯文字消息转为图片，启动时会检测所需资源是否存在，若不存在会自动下载到对应位置。生成的图片以 `base64` 格式发送，不保存到磁盘。
 
 ## 安装步骤
 
@@ -57,7 +55,7 @@ nonebot.load_plugin("nonebot_plugin_txt2img")
 
 ## 指令说明
 
-指令匹配方式添加了 `to_me()` 规则，在群聊中使用时需要在命令首部或尾部添加 `@{bot_self_id}` 或 `{bot_nickname}`。
+指令匹配方式添加了 `to_me()` 规则，在群聊中使用时需要在命令首部或尾部添加 @机器人 (`@{bot_self_id}`) 或 机器人昵称 (`{bot_nickname}`)。
 
 **使用指令**：txt2img
 
@@ -82,6 +80,7 @@ from nonebot_plugin_txt2img import Txt2Img
 
 ```python
 font_size = 32
+# 标题设置为 '' 或 ' ' 可以去除标题行
 title = '标题'
 text = '正文内容'
 img = Txt2Img(font_size)

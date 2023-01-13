@@ -18,7 +18,7 @@ _✨ 轻量文字转图片插件 ✨_
   <a href="https://pypi.python.org/pypi/nonebot-plugin-txt2img">
     <img src="https://img.shields.io/pypi/v/nonebot-plugin-txt2img.svg" alt="pypi">
   </a>
-  <img src="https://img.shields.io/badge/python-3.7+-blue.svg" alt="python">
+  <img src="https://img.shields.io/badge/python-3.7.3+-blue.svg" alt="python">
 </p>
 
 ## 简介
@@ -63,7 +63,9 @@ nonebot.load_plugin("nonebot_plugin_txt2img")
 
 * 标题：以 `1.5` 倍字体大小排版在首行居中位置。
 * 内容：以 `1` 倍字体大小左对齐排版。
-* 字体大小：位于 `10~120` 之间的数字。
+* 字体大小：位于 `20~120` 之间的数字。
+
+若内容只有一行，会根据内容文本宽度调节图片宽度。
 
 ## 跨插件使用
 
@@ -79,12 +81,27 @@ from nonebot_plugin_txt2img import Txt2Img
 使用方式：
 
 ```python
-font_size = 32
 # 标题设置为 '' 或 ' ' 可以去除标题行
 title = '标题'
 text = '正文内容'
-img = Txt2Img(font_size)
-pic = img.save(title, text)
+font_size = 32
+
+txt2img = Txt2Img()
+
+# 设置字体大小
+txt2img.set_font_size(font_size)
+
+# # 同时设置内容与标题字体大小
+# title_font_size = 48
+# txt2img.set_font_size(font_size, title_font_size)
+
+# # 设置固定宽度
+# # 设置后不会在内容只有一行时自动调整宽度
+# width = 1080
+# txt2img.set_width(1080)
+
+# 绘制图片并发送
+pic = txt2img.draw(title, text)
 msg = MessageSegment.image(pic)
 ```
 

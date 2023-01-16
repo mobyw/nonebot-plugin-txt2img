@@ -96,7 +96,7 @@ txt2img.set_font_size(font_size)
 # txt2img.set_font_size(font_size, title_font_size)
 
 # # 设置固定宽度
-# # 设置后不会在内容只有一行时自动调整宽度
+# # 设置后不会在内容较窄时自动调整宽度
 # width = 1080
 # txt2img.set_width(1080)
 

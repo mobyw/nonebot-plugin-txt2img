@@ -6,7 +6,7 @@ from typing import Optional
 from PIL import Image, ImageDraw, ImageFont
 from wcwidth import wcswidth, wcwidth
 
-from .config import BACKGROUND_FILE, BANNER_FILE, FONT_FILE, IMAGE_PATH
+from .config import BACKGROUND_FILE, BANNER_FILE, FONT_FILE
 
 out_padding = 30
 padding = 45
@@ -64,11 +64,12 @@ class Txt2Img:
         result = ""
         for ch in text:
             char_w = wcwidth(ch)
-            if wcwidth(ch) > 0:
+            if ch == "\n":
+                result += ch
+                temp_len = 0
+            elif wcwidth(ch) > 0:
                 result += ch
                 temp_len += char_w
-                if ch == "\n":
-                    temp_len = 0
                 if temp_len >= char_ws:
                     temp_len = 0
                     result += "\n"
@@ -85,15 +86,14 @@ class Txt2Img:
 
         text = self.word_wrap(text)
 
-        if text.find("\n") > -1:
-            text_rows = len(text.split("\n"))
-            total_w = self.img_width
+        lines = text.split("\n")
+        text_rows = len(lines)
+
+        if not self.fix_width:
+            line_max_width = max([wcswidth(line) for line in lines])
+            total_w = self.get_resized_width(line_max_width)
         else:
-            text_rows = 1
-            if not self.fix_width:
-                total_w = self.get_resized_width(wcswidth(text))
-            else:
-                total_w = self.img_width
+            total_w = self.img_width
 
         if title:
             inner_h = (

@@ -14,10 +14,10 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7.3"
+python = "^3.8"
 pillow = "^9.0.0"
 wcwidth = "^0.2.5"
-httpx = "^0.22.0"
+httpx = "^0.23.0"
 nonebot2 = "^2.0.0-beta.4"
 nonebot-adapter-onebot = "^2.0.0-beta.1"
 

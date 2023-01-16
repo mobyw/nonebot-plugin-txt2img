@@ -18,7 +18,7 @@ _✨ 轻量文字转图片插件 ✨_
   <a href="https://pypi.python.org/pypi/nonebot-plugin-txt2img">
     <img src="https://img.shields.io/pypi/v/nonebot-plugin-txt2img.svg" alt="pypi">
   </a>
-  <img src="https://img.shields.io/badge/python-3.7.3+-blue.svg" alt="python">
+  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
 </p>
 
 ## 简介

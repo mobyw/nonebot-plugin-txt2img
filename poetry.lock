@@ -158,7 +158,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "nonebot-adapter-onebot"
-version = "2.2.0"
+version = "2.2.1"
 description = "OneBot(CQHTTP) adapter for nonebot2"
 category = "main"
 optional = false
@@ -170,26 +170,27 @@ nonebot2 = ">=2.0.0-beta.3,<3.0.0"
 
 [[package]]
 name = "nonebot2"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 description = "An asynchronous python bot framework."
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
-fastapi = ">=0.87.0,<1.0.0"
+fastapi = {version = ">=0.87.0,<0.89.0 || >0.89.0,<1.0.0", optional = true, markers = "extra == \"fastapi\" or extra == \"all\""}
 loguru = ">=0.6.0,<0.7.0"
 pydantic = {version = ">=1.10.0,<2.0.0", extras = ["dotenv"]}
 pygtrie = ">=2.4.1,<3.0.0"
 tomlkit = ">=0.10.0,<1.0.0"
 typing-extensions = ">=3.10.0,<5.0.0"
-uvicorn = {version = ">=0.20.0,<1.0.0", extras = ["standard"]}
+uvicorn = {version = ">=0.20.0,<1.0.0", extras = ["standard"], optional = true, markers = "extra == \"quart\" or extra == \"fastapi\" or extra == \"all\""}
 yarl = ">=1.7.2,<2.0.0"
 
 [package.extras]
 websockets = ["websockets (>=10.0,<11.0)"]
-all = ["websockets (>=10.0,<11.0)", "Quart (>=0.18.0,<1.0.0)", "aiohttp[speedups] (>=3.7.4,<4.0.0)", "httpx[http2] (>=0.20.0,<1.0.0)"]
-quart = ["Quart (>=0.18.0,<1.0.0)"]
+all = ["websockets (>=10.0,<11.0)", "Quart (>=0.18.0,<1.0.0)", "fastapi (>=0.87.0,!=0.89.0,<1.0.0)", "aiohttp[speedups] (>=3.7.4,<4.0.0)", "httpx[http2] (>=0.20.0,<1.0.0)", "uvicorn[standard] (>=0.20.0,<1.0.0)"]
+quart = ["Quart (>=0.18.0,<1.0.0)", "uvicorn[standard] (>=0.20.0,<1.0.0)"]
+fastapi = ["fastapi (>=0.87.0,!=0.89.0,<1.0.0)", "uvicorn[standard] (>=0.20.0,<1.0.0)"]
 aiohttp = ["aiohttp[speedups] (>=3.7.4,<4.0.0)"]
 httpx = ["httpx[http2] (>=0.20.0,<1.0.0)"]
 
@@ -231,7 +232,7 @@ python-versions = "*"
 
 [[package]]
 name = "python-dotenv"
-version = "0.21.0"
+version = "0.21.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 category = "main"
 optional = false
@@ -388,8 +389,8 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8"
-content-hash = "700da08d5dac0d52edb7ccd2e111d3c0d00b44b771eec605e6ba7ae1068e15d9"
+python-versions = "^3.9"
+content-hash = "f52ed2c070256b205034db90e4326fdd95a62de2e99011cc80daeb30872be5d1"
 
 [metadata.files]
 anyio = []

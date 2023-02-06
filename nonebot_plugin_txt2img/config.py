@@ -16,7 +16,8 @@ FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
 BACKGROUND_FILE = IMAGE_PATH / "background.png"
 BANNER_FILE = IMAGE_PATH / "banner.png"
 
-data_url = "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
+github_proxy = "https://ghproxy.com/"
+data_url = github_proxy + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
 font_url = data_url + "/font/sarasa-mono-sc-regular.zip"
 background_url = data_url + "/image/background.png"
 banner_url = data_url + "/image/banner.png"
@@ -45,7 +46,7 @@ def unarchive_file(path: Path):
     except:  # noqa: E722
         shutil.rmtree(FONT_PATH)
         raise
-    assert FONT_PATH.exists(), "font file not found"
+    assert FONT_FILE.exists(), "font file not found"
 
 
 async def download_template():
@@ -58,35 +59,30 @@ async def download_template():
                             await file.write(chunk)
             return True
         except Exception as e:
-            logger.warning(f"Download failed: {e}")
+            logger.warning(f"Download failed: {url} {e}")
             return False
     
     failed = False
 
     # download font
-    if (await download(font_url, FONT_ZIP)):
-        logger.info("Download font successful")
+    if not await download(font_url, FONT_ZIP):
+        failed = True
+    else:
         try:
             await unarchive_file(FONT_ZIP)
         except Exception as e:
-            logger.warning(f"Unzip failed: {e}")
+            logger.warning(f"Unzip failed: {FONT_ZIP} {e}")
             failed = True
-    else:
-        failed = True
 
     # download background
-    if (await download(background_url, BACKGROUND_FILE)):
-        logger.info("Download background successful")
-    else:
+    if not await download(background_url, BACKGROUND_FILE):
         failed = True
 
     # download banner
-    if (await download(banner_url, BANNER_FILE)):
-        logger.info("Download banner successful")
-    else:
+    if not await download(banner_url, BANNER_FILE):
         failed = True
 
     if failed:
-        logger.warning("The resource is not fully downloaded.")
-        logger.warning("Please manually copy the resource file.")
-        logger.warning(f"Resource path: {DATA_PATH}")
+        logger.error("The resource is not fully downloaded.")
+        logger.error("Please manually copy the resource file.")
+        logger.error(f"Resource path: {DATA_PATH}")

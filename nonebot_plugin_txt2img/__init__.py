@@ -23,7 +23,7 @@ async def startup():
     logger.info("Initialing plugin txt2img")
     if not check_path():
         await download_template()
-        logger.info("Success to download txt2img template")
+        logger.info("Succeeded to download txt2img template")
 
 
 txt2img = on_command("txt2img", rule=to_me())

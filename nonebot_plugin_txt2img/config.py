@@ -1,28 +1,64 @@
-import shutil
 from pathlib import Path
 
 from anyio import open_file
 from httpx import AsyncClient
 from nonebot.log import logger
-from nonebot.utils import run_sync
 
 DATA_ROOT = Path.cwd() / "data"
 DATA_PATH = DATA_ROOT / "TXT2IMG"
 FONT_PATH = DATA_PATH / "font"
 IMAGE_PATH = DATA_PATH / "image"
-
-FONT_ZIP = FONT_PATH / "sarasa-mono-sc-regular.zip"
 FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
-BACKGROUND_FILE = IMAGE_PATH / "background.png"
-BANNER_FILE = IMAGE_PATH / "banner.png"
+MI_BACKGROUND_FILE = IMAGE_PATH / "mi_background.png"
+
 
 github_proxy = "https://ghproxy.com/"
-data_url = github_proxy + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
-font_url = data_url + "/font/sarasa-mono-sc-regular.zip"
-background_url = data_url + "/image/background.png"
-banner_url = data_url + "/image/banner.png"
+data_url = (
+    github_proxy
+    + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
+)
+font_url = data_url + "/font/sarasa-mono-sc-regular.ttf"
+mi_background_url = data_url + "/image/mi_background.png"
 
 
+templates = {
+    "mi": {
+        "font": str(FONT_FILE),
+        "text": {
+            "color": (125, 101, 89, 255),
+        },
+        "title": {
+            "color": (125, 101, 89, 255),
+        },
+        "margin": 80,
+        "background": {
+            "type": "image",
+            "image": str(MI_BACKGROUND_FILE),
+        },
+        "border": {
+            "color": (220, 211, 196, 255),
+            "width": 2,
+            "margin": 30,
+        },
+    },
+    "simple": {
+        "font": str(FONT_FILE),
+        "text": {
+            "color": (0, 0, 0, 255),
+        },
+        "title": {
+            "color": (0, 0, 0, 255),
+        },
+        "margin": 50,
+        "background": {
+            "type": "color",
+            "color": (255, 255, 255),
+        },
+    },
+}
+
+
+# 检查文件夹
 def check_path() -> bool:
     flag = True
     if not DATA_ROOT.exists():
@@ -36,20 +72,14 @@ def check_path() -> bool:
     if not IMAGE_PATH.exists():
         IMAGE_PATH.mkdir(parents=True, exist_ok=True)
         flag = False
+    if not FONT_FILE.exists() or not MI_BACKGROUND_FILE.exists():
+        flag = False
     return flag
 
 
-@run_sync
-def unarchive_file(path: Path):
-    try:
-        shutil.unpack_archive(path, extract_dir=FONT_PATH)
-    except:  # noqa: E722
-        shutil.rmtree(FONT_PATH)
-        raise
-    assert FONT_FILE.exists(), "font file not found"
-
-
-async def download_template():
+# 下载模板
+async def download_template() -> int:
+    # 下载文件
     async def download(url: str, path: Path) -> bool:
         try:
             async with await open_file(str(path), "wb") as file:
@@ -59,30 +89,20 @@ async def download_template():
                             await file.write(chunk)
             return True
         except Exception as e:
-            logger.warning(f"Download failed: {url} {e}")
+            logger.warning(f"下载文件失败: {url} {e}")
             return False
-    
-    failed = False
 
-    # download font
-    if not await download(font_url, FONT_ZIP):
-        failed = True
-    else:
-        try:
-            await unarchive_file(FONT_ZIP)
-        except Exception as e:
-            logger.warning(f"Unzip failed: {FONT_ZIP} {e}")
-            failed = True
+    if check_path():
+        return 2
 
-    # download background
-    if not await download(background_url, BACKGROUND_FILE):
-        failed = True
+    flag = 1
 
-    # download banner
-    if not await download(banner_url, BANNER_FILE):
-        failed = True
+    # 下载字体文件
+    if not await download(font_url, FONT_FILE):
+        flag = 0
 
-    if failed:
-        logger.error("The resource is not fully downloaded.")
-        logger.error("Please manually copy the resource file.")
-        logger.error(f"Resource path: {DATA_PATH}")
+    # 下载背景文件
+    if not await download(mi_background_url, MI_BACKGROUND_FILE):
+        flag = 0
+
+    return flag

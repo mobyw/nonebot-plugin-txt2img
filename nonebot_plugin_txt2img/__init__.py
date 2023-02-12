@@ -1,29 +1,45 @@
-from nonebot import get_driver, on_command
-from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot import get_driver, on_command, on_metaevent
+from nonebot.adapters.onebot.v11 import Bot, LifecycleMetaEvent, MessageSegment
 from nonebot.log import logger
 from nonebot.params import ArgPlainText
 from nonebot.plugin import PluginMetadata
 from nonebot.rule import to_me
 
-from .config import check_path, download_template
+from .config import download_template
 from .txt2img import Txt2Img
 
 __plugin_meta__ = PluginMetadata(
     name="文字转图片",
     description="使用 Pillow 进行文字转图片",
     usage="""发送 txt2img 命令即可交互进行文字转图片""",
-    extra={"version": "0.2.0"},
+    extra={"version": "0.3.0"},
 )
 
-driver = get_driver()
+
+def check_first_connect(_: LifecycleMetaEvent) -> bool:
+    return True
 
 
-@driver.on_startup
-async def startup():
-    logger.info("Initialing plugin txt2img")
-    if not check_path():
-        await download_template()
-        logger.info("Succeeded to download txt2img template")
+start_metaevent = on_metaevent(rule=check_first_connect, temp=True)
+
+
+@start_metaevent.handle()
+async def start(bot: Bot) -> None:
+    logger.info("开始检查资源文件")
+    flag = await download_template()
+    if flag == 2:
+        logger.info("模板文件完好")
+    elif flag == 1:
+        logger.info("模板文件下载完成")
+    else:
+        message = "模板文件下载失败，请尝试手动下载并放置到工程目录下的 data/TXT2IMG 文件夹中"
+        logger.warning(message)
+        try:
+            await bot.send_private_msg(
+                user_id=int(list(get_driver().config.superusers)[0]), message=message
+            )
+        except Exception as e:
+            logger.warning(f"发送提示消息失败: {e}")
 
 
 txt2img = on_command("txt2img", rule=to_me())

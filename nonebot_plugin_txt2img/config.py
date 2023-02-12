@@ -25,10 +25,10 @@ templates = {
     "mi": {
         "font": str(FONT_FILE),
         "text": {
-            "color": (125, 101, 89, 255),
+            "color": (125, 101, 89),
         },
         "title": {
-            "color": (125, 101, 89, 255),
+            "color": (125, 101, 89),
         },
         "margin": 80,
         "background": {
@@ -36,7 +36,7 @@ templates = {
             "image": str(MI_BACKGROUND_FILE),
         },
         "border": {
-            "color": (220, 211, 196, 255),
+            "color": (220, 211, 196),
             "width": 2,
             "margin": 30,
         },
@@ -44,10 +44,10 @@ templates = {
     "simple": {
         "font": str(FONT_FILE),
         "text": {
-            "color": (0, 0, 0, 255),
+            "color": (0, 0, 0),
         },
         "title": {
-            "color": (0, 0, 0, 255),
+            "color": (0, 0, 0),
         },
         "margin": 50,
         "background": {

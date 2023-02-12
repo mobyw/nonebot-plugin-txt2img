@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041-->
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/mobyw/images@main/Screenshots/nonebot-plugin-txt2img.png" width="400px"/>
+  <img src="https://github.com/mobyw/images/raw/main/Screenshots/nonebot-plugin-txt2img.png" width="400px"/>
 </p>
 
 <div align="center">
@@ -35,7 +35,7 @@ _✨ 轻量文字转图片插件 ✨_
 
 ### 安装 nonebot-plugin-txt2img
 
-#### 使用 `nb-cli` 安装
+#### 使用 `nb-cli` 安装（推荐）
 
 ```bash
 nb plugin install nonebot-plugin-txt2img
@@ -65,7 +65,7 @@ nonebot.load_plugin("nonebot_plugin_txt2img")
 * 内容：以 `1` 倍字体大小左对齐排版。
 * 字体大小：位于 `20~120` 之间的数字。
 
-若内容只有一行，会根据内容文本宽度调节图片宽度。
+若内容不满一行，或每行都是较短的内容，会根据内容文本宽度调节图片宽度。
 
 ## 跨插件使用
 
@@ -78,7 +78,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_txt2img import Txt2Img
 ```
 
-使用方式：
+基本使用方式：
 
 ```python
 # 标题设置为 '' 或 ' ' 可以去除标题行
@@ -100,8 +100,55 @@ txt2img.set_font_size(font_size)
 # width = 1080
 # txt2img.set_width(1080)
 
-# 绘制图片并发送
+# # 绘制 PIL.Image.Image 图片
+# pic = txt2img.draw_img(title, text)
+
+# 绘制 base64 图片并发送
 pic = txt2img.draw(title, text)
+msg = MessageSegment.image(pic)
+```
+
+使用模板：
+
+插件内置 `["mi", "simple"]` 两个模板，分别是小米便笺以及黑底白字简单风格。默认模板是 `"mi"`，可使用以下代码修改使用的模板：
+
+```python
+...
+# 使用简约模板
+pic = txt2img.draw(title, text, "simple")
+msg = MessageSegment.image(pic)
+```
+
+也可以传入一个 `dict` 以实现自定义模板，示例如下：
+
+```python
+template = {
+    {
+        # 必填项
+        "font": "arial.ttf",                # 字体文件路径字符串，必填
+        "text": {
+            "color": (0, 0, 0),             # 正文颜色 RGB，必填
+        },
+        "title": {
+            "color": (0, 0, 0),             # 标题颜色 RGB，必填
+        },
+        "margin": 80,                       # 边距，必填
+        "background": {
+            "type": "image",                # 背景类型，"image" 或 "color"，必填
+            "image": "/path/to/img.png",    # 背景图片路径，类型为 "image" 时必填
+            "color": (255, 255, 255),       # 背景颜色 RGB，类型为 "color" 时必填
+        },
+        # 可选项
+        "border": {
+            "color": (255, 255, 0),         # 边框颜色 RGB，必填
+            "width": 2,                     # 边框宽度，必填
+            "margin": 30,                   # 边框边距，小于顶层 "margin" 项，必填
+        },
+    }
+}
+...
+# 使用自定义模板
+pic = txt2img.draw(title, text, template)
 msg = MessageSegment.image(pic)
 ```
 

@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 MD041-->
+<!-- markdownlint-disable MD033 MD036 MD041-->
 <p align="center">
   <img src="https://github.com/mobyw/images/raw/main/Screenshots/nonebot-plugin-txt2img.png" width="400px"/>
 </p>
@@ -123,28 +123,26 @@ msg = MessageSegment.image(pic)
 
 ```python
 template = {
-    {
-        # 必填项
-        "font": "arial.ttf",                # 字体文件路径字符串，必填
-        "text": {
-            "color": (0, 0, 0),             # 正文颜色 RGB，必填
-        },
-        "title": {
-            "color": (0, 0, 0),             # 标题颜色 RGB，必填
-        },
-        "margin": 80,                       # 边距，必填
-        "background": {
-            "type": "image",                # 背景类型，"image" 或 "color"，必填
-            "image": "/path/to/img.png",    # 背景图片路径，类型为 "image" 时必填
-            "color": (255, 255, 255),       # 背景颜色 RGB，类型为 "color" 时必填
-        },
-        # 可选项
-        "border": {
-            "color": (255, 255, 0),         # 边框颜色 RGB，必填
-            "width": 2,                     # 边框宽度，必填
-            "margin": 30,                   # 边框边距，小于顶层 "margin" 项，必填
-        },
-    }
+    # 必填项
+    "font": "arial.ttf",                # 字体文件路径字符串，必填
+    "text": {
+        "color": (0, 0, 0),             # 正文颜色 RGB，必填
+    },
+    "title": {
+        "color": (0, 0, 0),             # 标题颜色 RGB，必填
+    },
+    "margin": 80,                       # 边距，必填
+    "background": {
+        "type": "image",                # 背景类型，"image" 或 "color"，必填
+        "image": "/path/to/img.png",    # 背景图片路径，类型为 "image" 时必填
+        "color": (255, 255, 255),       # 背景颜色 RGB，类型为 "color" 时必填
+    },
+    # 可选项
+    "border": {
+        "color": (255, 255, 0),         # 边框颜色 RGB，必填
+        "width": 2,                     # 边框宽度，必填
+        "margin": 30,                   # 边框边距，小于顶层 "margin" 项，必填
+    },
 }
 ...
 # 使用自定义模板

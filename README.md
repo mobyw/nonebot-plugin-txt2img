@@ -47,10 +47,10 @@ nb plugin install nonebot-plugin-txt2img
 pip install nonebot-plugin-txt2img
 ```
 
-需要在 `bot.py` 文件添加以下代码加载插件：
+需要在 bot 根目录 `pyproject.toml` 文件中 [tool.nonebot] 部分添加：
 
 ```python
-nonebot.load_plugin("nonebot_plugin_txt2img")
+plugins = ["nonebot_plugin_txt2img"]
 ```
 
 ## 指令说明

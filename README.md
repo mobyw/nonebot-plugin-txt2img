@@ -74,13 +74,16 @@ plugins = ["nonebot_plugin_txt2img"]
 导入方式：
 
 ```python
-from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot import require
+require("nonebot_plugin_txt2img")
 from nonebot_plugin_txt2img import Txt2Img
 ```
 
-基本使用方式：
+基本使用方式（以 `OneBot V11` 为例）：
 
 ```python
+from nonebot.adapters.onebot.v11 import MessageSegment
+
 # 标题设置为 '' 或 ' ' 可以去除标题行
 title = '标题'
 text = '正文内容'

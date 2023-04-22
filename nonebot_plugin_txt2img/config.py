@@ -1,7 +1,7 @@
+import asyncio
 from pathlib import Path
 
-from anyio import open_file
-from httpx import AsyncClient
+import httpx
 from nonebot.log import logger
 
 DATA_ROOT = Path.cwd() / "data"
@@ -12,7 +12,7 @@ FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
 MI_BACKGROUND_FILE = IMAGE_PATH / "mi_background.png"
 
 
-github_proxy = "https://ghproxy.com/"
+github_proxy = "https://github.moeyy.xyz/"
 data_url = (
     github_proxy
     + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
@@ -80,17 +80,21 @@ def check_path() -> bool:
 # 下载模板
 async def download_template() -> int:
     # 下载文件
-    async def download(url: str, path: Path) -> bool:
-        try:
-            async with await open_file(str(path), "wb") as file:
-                async with AsyncClient() as client:
-                    async with client.stream("GET", url) as response:
-                        async for chunk in response.aiter_bytes():
-                            await file.write(chunk)
-            return True
-        except Exception as e:
-            logger.warning(f"下载文件失败: {url} {e}")
-            return False
+    async def download(url: str) -> bytes:
+        async with httpx.AsyncClient() as client:
+            for i in range(3):
+                try:
+                    resp = await client.get(url, timeout=20)
+                    if resp.status_code == 302:
+                        url = resp.headers["location"]
+                        continue
+                    resp.raise_for_status()
+                    return resp.content
+                except Exception as e:
+                    logger.warning(f"Error downloading {url}, retry {i}/3: {e}")
+                    await asyncio.sleep(3)
+            logger.error(f"Error downloading {url}, all attempts failed.")
+            raise Exception(f"{url} 下载失败！")
 
     if check_path():
         return 2
@@ -98,11 +102,21 @@ async def download_template() -> int:
     flag = 1
 
     # 下载字体文件
-    if not await download(font_url, FONT_FILE):
+    try:
+        font_data = await download(font_url)
+        with FONT_FILE.open("wb") as f:
+            f.write(font_data)
+    except Exception as e:
         flag = 0
+        logger.warning(str(e))
 
     # 下载背景文件
-    if not await download(mi_background_url, MI_BACKGROUND_FILE):
+    try:
+        mi_bg_data = await download(mi_background_url)
+        with MI_BACKGROUND_FILE.open("wb") as f:
+            f.write(mi_bg_data)
+    except Exception as e:
         flag = 0
+        logger.warning(str(e))
 
     return flag

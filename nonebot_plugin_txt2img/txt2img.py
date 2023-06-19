@@ -82,7 +82,7 @@ class Txt2Img:
     def draw_img(
         self, title: str, text: str, template: Union[str, dict] = "mi"
     ) -> Image.Image:
-        """绘制给定模板模板下的图片"""
+        """绘制给定模板下的图片"""
 
         if isinstance(template, str):
             try:

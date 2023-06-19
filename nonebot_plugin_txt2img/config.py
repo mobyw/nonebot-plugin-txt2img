@@ -12,7 +12,7 @@ FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
 MI_BACKGROUND_FILE = IMAGE_PATH / "mi_background.png"
 
 
-github_proxy = "https://github.moeyy.xyz/"
+github_proxy = "https://ghproxy.net/"
 data_url = (
     github_proxy
     + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"

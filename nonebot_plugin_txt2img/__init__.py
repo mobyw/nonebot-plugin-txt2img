@@ -1,5 +1,4 @@
-from nonebot import get_driver, on_command, on_metaevent
-from nonebot.adapters.onebot.v11 import Bot, LifecycleMetaEvent, MessageSegment
+from nonebot import get_driver, on_command, require
 from nonebot.log import logger
 from nonebot.params import ArgPlainText
 from nonebot.plugin import PluginMetadata
@@ -8,23 +7,29 @@ from nonebot.rule import to_me
 from .config import download_template
 from .txt2img import Txt2Img
 
+require("nonebot_plugin_saa")
+from nonebot_plugin_saa import Image
+
 __plugin_meta__ = PluginMetadata(
     name="文字转图片",
     description="使用 Pillow 进行文字转图片",
     usage="""发送 txt2img 命令即可交互进行文字转图片""",
-    extra={"version": "0.3.0"},
+    type="library",
+    homepage="https://github.com/mobyw/nonebot-plugin-txt2img",
+    supported_adapters={
+        "~onebot.v11",
+        "~onebot.v12",
+        "~kaiheila",
+        "~qqguild",
+        "~telegram",
+    },
 )
 
-
-def check_first_connect(_: LifecycleMetaEvent) -> bool:
-    return True
+driver = get_driver()
 
 
-start_metaevent = on_metaevent(rule=check_first_connect, temp=True)
-
-
-@start_metaevent.handle()
-async def start(bot: Bot) -> None:
+@driver.on_startup
+async def start() -> None:
     logger.info("开始检查资源文件")
     flag = await download_template()
     if flag == 2:
@@ -33,13 +38,7 @@ async def start(bot: Bot) -> None:
         logger.info("模板文件下载完成")
     else:
         message = "模板文件下载失败，请尝试手动下载并放置到工程目录下的 data/TXT2IMG 文件夹中"
-        logger.warning(message)
-        try:
-            await bot.send_private_msg(
-                user_id=int(list(get_driver().config.superusers)[0]), message=message
-            )
-        except Exception as e:
-            logger.warning(f"发送提示消息失败: {e}")
+        logger.error(message)
 
 
 txt2img = on_command("txt2img", rule=to_me())
@@ -59,8 +58,10 @@ async def txt2img_handle(
             img = Txt2Img()
             img.set_font_size(font_size)
             pic = img.draw(title, text)
-            await txt2img.finish(MessageSegment.image(pic))  # type: ignore
+            msg_builder = Image(pic)
+            await msg_builder.send()
+            await txt2img.finish()
         else:
-            await txt2img.reject("字体大小需要在20到120之间，请重新输入")  # type: ignore
+            await txt2img.reject("字体大小需要在20到120之间，请重新输入")
     else:
-        await txt2img.reject("字体大小格式有误，请输入20到120之间的数字")  # type: ignore
+        await txt2img.reject("字体大小格式有误，请输入20到120之间的数字")

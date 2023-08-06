@@ -153,6 +153,13 @@ pic = txt2img.draw(title, text, template)
 msg = MessageSegment.image(pic)
 ```
 
+## 代理设置
+
+在bot文件夹.env文件中，可以配置下载资源时使用的github代理
+如不填写，默认为以下代理
+
+    github_proxy:str = "https://ghproxy.net/"
+
 ## 项目致谢
 
 本项目基于以下项目或服务实现，排名不分先后。

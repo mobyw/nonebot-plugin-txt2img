@@ -2,7 +2,9 @@ import asyncio
 from pathlib import Path
 
 import httpx
+from nonebot import get_driver
 from nonebot.log import logger
+from pydantic import BaseSettings
 
 DATA_ROOT = Path.cwd() / "data"
 DATA_PATH = DATA_ROOT / "TXT2IMG"
@@ -12,9 +14,14 @@ FONT_FILE = FONT_PATH / "sarasa-mono-sc-regular.ttf"
 MI_BACKGROUND_FILE = IMAGE_PATH / "mi_background.png"
 
 
-github_proxy = "https://ghproxy.net/"
+class Config(BaseSettings):
+    github_proxy:str = "https://ghproxy.net/"
+    
+config = Config.parse_obj(get_driver().config)
+
+
 data_url = (
-    github_proxy
+    config.github_proxy
     + "https://raw.githubusercontent.com/mobyw/nonebot-plugin-txt2img/main/data/TXT2IMG"
 )
 font_url = data_url + "/font/sarasa-mono-sc-regular.ttf"

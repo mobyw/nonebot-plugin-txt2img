@@ -8,7 +8,7 @@ from .config import download_template
 from .txt2img import Txt2Img
 
 require("nonebot_plugin_saa")
-from nonebot_plugin_saa import Image
+from nonebot_plugin_saa import Image  # noqa: E402
 
 __plugin_meta__ = PluginMetadata(
     name="文字转图片",

@@ -61,9 +61,9 @@ plugins = ["nonebot_plugin_txt2img"]
 
 发送指令后根据提示输入标题、内容与字体大小，即可完成图片生成。
 
-* 标题：以 `1.5` 倍字体大小排版在首行居中位置。
-* 内容：以 `1` 倍字体大小左对齐排版。
-* 字体大小：位于 `20~120` 之间的数字。
+- 标题：以 `1.5` 倍字体大小排版在首行居中位置。
+- 内容：以 `1` 倍字体大小左对齐排版。
+- 字体大小：位于 `20~120` 之间的数字。
 
 若内容不满一行，或每行都是较短的内容，会根据内容文本宽度调节图片宽度。
 
@@ -153,10 +153,18 @@ pic = txt2img.draw(title, text, template)
 msg = MessageSegment.image(pic)
 ```
 
+## 代理设置
+
+在对应 env 文件（如 `.env` `.env.prod`）中，可以修改下载资源时使用的 GitHub 代理：
+
+```text
+GITHUB_PROXY="https://ghproxy.com"
+```
+
 ## 项目致谢
 
 本项目基于以下项目或服务实现，排名不分先后。
 
-* [nonebot2](https://github.com/nonebot/nonebot2)
-* [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
-* [txt2img](https://github.com/taseikyo/txt2img)
+- [nonebot2](https://github.com/nonebot/nonebot2)
+- [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
+- [txt2img](https://github.com/taseikyo/txt2img)

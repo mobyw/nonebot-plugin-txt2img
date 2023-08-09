@@ -8,7 +8,8 @@ from .config import download_template
 from .txt2img import Txt2Img
 
 require("nonebot_plugin_saa")
-from nonebot_plugin_saa import Image  # noqa: E402
+from nonebot_plugin_saa import Image
+from nonebot_plugin_saa import __plugin_meta__ as saa_plugin_meta
 
 __plugin_meta__ = PluginMetadata(
     name="文字转图片",
@@ -16,13 +17,7 @@ __plugin_meta__ = PluginMetadata(
     usage="""发送 txt2img 命令即可交互进行文字转图片""",
     type="library",
     homepage="https://github.com/mobyw/nonebot-plugin-txt2img",
-    supported_adapters={
-        "~onebot.v11",
-        "~onebot.v12",
-        "~kaiheila",
-        "~qqguild",
-        "~telegram",
-    },
+    supported_adapters=saa_plugin_meta.supported_adapters,
 )
 
 driver = get_driver()

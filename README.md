@@ -31,7 +31,7 @@ _✨ 轻量文字转图片插件 ✨_
 
 完整文档可以在 [这里](https://v2.nonebot.dev/) 查看。
 
-请在创建项目时选用 `onebot v11` 适配器，并且按照文档完成最小实例的创建。
+请在创建项目时选用合适的适配器，并且按照文档完成最小实例的创建。
 
 ### 安装 nonebot-plugin-txt2img
 
@@ -53,9 +53,25 @@ pip install nonebot-plugin-txt2img
 plugins = ["nonebot_plugin_txt2img"]
 ```
 
+## Driver 设置
+
+自动下载资源文件需要参考 [driver](https://nonebot.dev/docs/appendices/config#driver) 配置项，添加 `ForwardDriver` 支持，在对应 env 文件（如 `.env` `.env.prod`）中，如：
+
+```text
+DRIVER=~fastapi+~httpx
+```
+
+## 代理设置
+
+在对应 env 文件（如 `.env` `.env.prod`）中，可以修改下载资源时使用的 GitHub 代理：
+
+```text
+GITHUB_PROXY="https://ghproxy.com"
+```
+
 ## 指令说明
 
-指令匹配方式添加了 `to_me()` 规则，在群聊中使用时需要在命令首部或尾部添加 @机器人 (`@{bot_self_id}`) 或 机器人昵称 (`{bot_nickname}`)。
+指令匹配方式添加了 `to_me()` 规则，在群聊中使用时需要在命令首部或尾部添加 @机器人 或 机器人昵称。
 
 **使用指令**：txt2img
 
@@ -106,14 +122,14 @@ txt2img.set_font_size(font_size)
 # # 绘制 PIL.Image.Image 图片
 # pic = txt2img.draw_img(title, text)
 
-# 绘制 base64 图片并发送
+# 绘制 ByteIO 图片并发送
 pic = txt2img.draw(title, text)
 msg = MessageSegment.image(pic)
 ```
 
 使用模板：
 
-插件内置 `["mi", "simple"]` 两个模板，分别是小米便笺以及黑底白字简单风格。默认模板是 `"mi"`，可使用以下代码修改使用的模板：
+插件内置 `["default", "simple"]` 两个模板，分别是小米便笺以及黑底白字简单风格。默认模板是 `"default"`，可使用以下代码修改使用的模板：
 
 ```python
 ...
@@ -122,43 +138,16 @@ pic = txt2img.draw(title, text, "simple")
 msg = MessageSegment.image(pic)
 ```
 
-也可以传入一个 `dict` 以实现自定义模板，示例如下：
+也可以传入一个 `Template` 对象以实现自定义模板，具体字段请参考代码内的标注，示例如下：
 
 ```python
-template = {
-    # 必填项
-    "font": "arial.ttf",                # 字体文件路径字符串，必填
-    "text": {
-        "color": (0, 0, 0),             # 正文颜色 RGB，必填
-    },
-    "title": {
-        "color": (0, 0, 0),             # 标题颜色 RGB，必填
-    },
-    "margin": 80,                       # 边距，必填
-    "background": {
-        "type": "image",                # 背景类型，"image" 或 "color"，必填
-        "image": "/path/to/img.png",    # 背景图片路径，类型为 "image" 时必填
-        "color": (255, 255, 255),       # 背景颜色 RGB，类型为 "color" 时必填
-    },
-    # 可选项
-    "border": {
-        "color": (255, 255, 0),         # 边框颜色 RGB，必填
-        "width": 2,                     # 边框宽度，必填
-        "margin": 30,                   # 边框边距，小于顶层 "margin" 项，必填
-    },
-}
+from nonebot_plugin_txt2img import Template
+
+template = Template(...)
 ...
 # 使用自定义模板
 pic = txt2img.draw(title, text, template)
 msg = MessageSegment.image(pic)
-```
-
-## 代理设置
-
-在对应 env 文件（如 `.env` `.env.prod`）中，可以修改下载资源时使用的 GitHub 代理：
-
-```text
-GITHUB_PROXY="https://ghproxy.com"
 ```
 
 ## 项目致谢

@@ -1,242 +1,207 @@
-from base64 import b64encode
 from io import BytesIO
-from pathlib import Path
-from typing import Optional, Union
+from copy import deepcopy
+from typing import Union, Optional
 
+from pydantic.color import ColorType
 from PIL import Image, ImageDraw, ImageFont
 
-from .config import FONT_FILE, templates
+from .template import templates
+from .model import Template, ColorBackground, ImageBackground
 
 
 class Txt2Img:
-    """Convert text to image"""
+    """
+    纯文本转图片
+    """
 
-    font_family: str
-    title_font_size: int
-    text_font_size: int
-    title_line_space: int
-    text_line_space: int
-    text_max_width: int
-    fix_width: bool
-    text_color: tuple
-    title_color: tuple
-    bg_color: tuple
+    fix_width: bool = False
+    max_width: int = 1080
 
-    def __init__(self):
-        self.font_family = str(FONT_FILE)
-        self.title_font_size = 45
-        self.text_font_size = 30
-        self.title_line_space = 30
-        self.text_line_space = 15
-        self.text_max_width = 1080
-        self.fix_width = False
-        self.text_color = (0, 0, 0, 255)
-        self.title_color = (0, 0, 0, 255)
-        self.bg_color = (255, 255, 255, 0)
+    template: Template = deepcopy(templates["default"])
 
-    def set_font_family(self, font_family: str):
-        """设置字体"""
-        self.font_family = font_family
+    def __init__(self, template: Union[Template, str, None] = None):
+        if isinstance(template, Template):
+            self.template = deepcopy(template)
+        elif isinstance(template, str) and template in templates.keys():
+            self.template = deepcopy(templates[template])
 
-    def set_font_size(self, font_size: int, title_font_size: Optional[int] = None):
+    def set_font_size(self, size: int, title: Optional[int] = None):
         """设置字体大小"""
-        self.text_font_size = font_size
-        self.text_line_space = font_size // 2
-        if title_font_size is not None:
-            self.title_font_size = title_font_size
-        else:
-            self.title_font_size = int(font_size * 1.5)
-        self.title_line_space = font_size
+        self.template.set_content_size(size)
+        self.template.set_title_size(title if title else int(size * 1.5))
 
-    def set_font_color(self, text_color: tuple, title_color: Optional[tuple] = None):
+    def set_font_color(self, color: ColorType, title: Optional[ColorType] = None):
         """设置字体颜色"""
-        self.text_color = text_color
-        if title_color is not None:
-            self.title_color = title_color
-        else:
-            self.title_color = text_color
+        self.template.set_content_color(color)
+        self.template.set_title_color(title if title else color)
 
     def set_width(self, width: int):
-        """设置图片宽度"""
-        self.text_max_width = width
+        """设置固定图片宽度"""
+        self.max_width = width
         self.fix_width = True
 
-    def word_wrap(self, text: str, font: ImageFont.FreeTypeFont) -> str:
-        """自动换行"""
-        temp_len = 0
-        result = ""
-        for ch in text:
-            char_w = font.getsize(ch)[0]
+    def text_word_wrap(self, content: str) -> str:
+        """文本内容自动换行"""
+        font_config = self.template.get_content_font()
+        font = ImageFont.truetype(font_config.font.as_posix(), font_config.size)
+        length_counter: int = 0
+        text_result: str = ""
+        # 处理文本
+        for ch in content:
             if ch == "\n":
-                result += ch
-                temp_len = 0
-            elif char_w > 0:
-                result += ch
-                temp_len += char_w
-                if temp_len > self.text_max_width - self.text_font_size:
-                    temp_len = 0
-                    result += "\n"
-        result = result.rstrip()
-        return result
+                # 换行
+                text_result += ch
+                length_counter = 0
+                continue
+            char_width = font.getlength(ch)
+            if char_width <= 0:
+                # 不可见字符
+                continue
+            text_result += ch
+            length_counter += char_width
+            if length_counter + font_config.size > self.max_width:
+                length_counter = 0
+                text_result += "\n"
+        # 移除末尾空白
+        text_result = text_result.rstrip()
+        return text_result
 
-    def draw_img(
-        self, title: str, text: str, template: Union[str, dict] = "mi"
-    ) -> Image.Image:
-        """绘制给定模板下的图片"""
-
-        if isinstance(template, str):
-            try:
-                template = templates[template]  # type: ignore
-            except KeyError:
-                template = templates["mi"]  # type: ignore
-
-        try:
-            font_family = template["font"]  # type: ignore
-            text_color = template["text"]["color"]  # type: ignore
-            title_color = template["title"]["color"]  # type: ignore
-            margin = int(template["margin"])  # type: ignore
-            background = template["background"]  # type: ignore
-        except KeyError:
-            raise ValueError("Invalid template")
-
-        if not Path(font_family).exists():
-            raise ValueError("Invalid font")
-
-        self.set_font_family(font_family)
-        self.set_font_color(text_color, title_color)  # type: ignore
-        text_img = self.draw_text(title, text)
-
-        try:
-            if background["type"] == "image":  # type: ignore
-                out_img = Image.new(
-                    "RGBA",
-                    (text_img.width + 2 * margin, text_img.height + 2 * margin),
-                    (0, 0, 0, 0),
-                )
-                bg_img = Image.open(background["image"])  # type: ignore
-                out_img = tile_image(bg_img, out_img)
-            elif background["type"] == "color":  # type: ignore
-                out_img = Image.new("RGBA", (text_img.width + 2 * margin, text_img.height + 2 * margin), background["color"])  # type: ignore
-            else:
-                raise ValueError("Invalid background type")
-        except Exception:
-            raise ValueError("Invalid template")
-
-        out_img.paste(text_img, (margin, margin), text_img)
-
-        try:
-            border = template["border"]  # type: ignore
-            border_color = border["color"]  # type: ignore
-            border_width = int(border["width"])  # type: ignore
-            border_margin = int(border["margin"])  # type: ignore
-            draw = ImageDraw.Draw(out_img)
-            draw.rectangle(
-                (
-                    border_margin,
-                    border_margin,
-                    out_img.width - border_margin,
-                    out_img.height - border_margin,
-                ),
-                outline=border_color,
-                width=border_width,
-            )
-        except KeyError:
-            pass
-        except Exception:
-            raise ValueError("Invalid template")
-
-        return out_img
-
-    def draw(self, title: str, text: str, template: Union[str, dict] = "mi") -> str:
-        """绘制给定模板下指定标题与正文的图片并转换为base64"""
-        out_img = self.draw_img(title, text, template)
-        return img2b64(out_img)
-
-    def draw_text(self, title: str, text: str) -> Image.Image:
+    def draw_text(self, title: str, content: str) -> Image.Image:
         """绘制标题与正文的图片"""
-        title_font = ImageFont.truetype(self.font_family, self.title_font_size)
-        text_font = ImageFont.truetype(self.font_family, self.text_font_size)
-
-        if title == " ":
-            title = ""
-
+        title_font_config = self.template.get_title_font()
+        title_font = ImageFont.truetype(
+            title_font_config.font.as_posix(), title_font_config.size
+        )
+        content_font_config = self.template.get_content_font()
+        content_font = ImageFont.truetype(
+            content_font_config.font.as_posix(), content_font_config.size
+        )
+        # 移除标题两端空白
+        title = title.strip()
+        # 多行标题只取首行
         if len(title.split("\n")) > 1:
             title = title.split("\n")[0]
-
-        text = self.word_wrap(text, text_font)
-
-        lines = text.split("\n")
-        text_rows = len(lines)
-
-        title_width = title_font.getsize(title)[0]
-
+        # 预处理正文文本
+        content = self.text_word_wrap(content)
+        content_lines = content.split("\n")
+        content_row_number = len(content_lines)
+        # 获取标题宽度
+        title_width = title_font.getlength(title)
+        # 调整宽度
         if not self.fix_width:
-            line_max_width = max([text_font.getsize(line)[0] for line in lines])
-            text_total_width = max(line_max_width, title_width)
+            line_max_width = max(
+                [content_font.getlength(line) for line in content_lines]
+            )
+            text_total_width = int(max(line_max_width, title_width))
         else:
-            text_total_width = self.text_max_width
-
+            text_total_width = self.max_width
+        # 计算图像高度
         if title:
             text_total_height = (
-                self.title_font_size
-                + self.title_line_space
-                + self.text_font_size * text_rows
-                + (text_rows - 1) * (self.text_line_space)
+                title_font.size
+                + content_font.size  # title line space
+                + content_font.size * content_row_number
+                + (content_row_number - 1)
+                * (content_font.size // 2)  # content line space
             )
         else:
-            text_total_height = self.text_font_size * text_rows + (text_rows - 1) * (
-                self.text_line_space
-            )
-
-        out_img = Image.new(
-            mode="RGBA", size=(text_total_width, text_total_height), color=self.bg_color
+            text_total_height = content_font.size * content_row_number + (
+                content_row_number - 1
+            ) * (content_font.size // 2)
+        # 创建画布
+        output_image = Image.new(
+            mode="RGBA",
+            size=(text_total_width, text_total_height),
+            color=(255, 255, 255, 0),
         )
-        draw = ImageDraw.Draw(out_img)
-
+        draw = ImageDraw.Draw(output_image)
+        # 绘制标题
+        content_offset = 0
         if title:
             draw.text(
                 ((text_total_width - title_width) // 2, 0),
                 title,
                 font=title_font,
-                fill=self.text_color,
-                spacing=self.title_line_space,
+                fill=title_font_config.color.as_rgb(),
+                spacing=content_font.size,
             )
-            draw.text(
+            content_offset = title_font.size + content_font.size
+        # 绘制正文
+        draw.text(
+            (0, content_offset),
+            content,
+            font=content_font,
+            fill=content_font_config.color.as_rgb(),
+            spacing=content_font.size // 2,
+        )
+        return output_image
+
+    def draw_img(
+        self, title: str, text: str, template: Union[Template, str, None] = None
+    ) -> Image.Image:
+        """绘制给定文本的图片"""
+        # 修改模板
+        if isinstance(template, Template):
+            self.template = deepcopy(template)
+        elif isinstance(template, str) and template in templates.keys():
+            self.template = deepcopy(templates[template])
+        # 绘制文字区域
+        text_image = self.draw_text(title, text)
+        # 绘制图片背景
+        if isinstance(background := self.template.background, ImageBackground):
+            full_image = Image.new(
+                "RGBA",
                 (
-                    0,
-                    self.title_font_size + self.title_line_space,
+                    text_image.width + 2 * self.template.margin,
+                    text_image.height + 2 * self.template.margin,
                 ),
-                text,
-                font=text_font,
-                fill=self.text_color,
-                spacing=self.text_line_space,
+                (0, 0, 0, 0),
+            )
+            background_image = Image.open(background.image)
+            full_image = tile_image(background_image, full_image)
+        elif isinstance(background := self.template.background, ColorBackground):
+            full_image = Image.new(
+                "RGBA",
+                (
+                    text_image.width + 2 * self.template.margin,
+                    text_image.height + 2 * self.template.margin,
+                ),
+                background.color.as_rgb(),
             )
         else:
-            draw.text(
-                (0, 0),
-                text,
-                font=text_font,
-                fill=self.text_color,
-                spacing=self.text_line_space,
+            raise ValueError("未知的图像背景配置")
+        full_image.paste(
+            text_image, (self.template.margin, self.template.margin), text_image
+        )
+        # 绘制图片边框
+        if (border := self.template.border) is not None:
+            draw = ImageDraw.Draw(full_image)
+            draw.rectangle(
+                (
+                    border.margin,
+                    border.margin,
+                    full_image.width - border.margin,
+                    full_image.height - border.margin,
+                ),
+                outline=border.color.as_rgb(),
+                width=border.width,
             )
+        return full_image
 
-        return out_img
-
-
-def tile_image(small_image: Image.Image, big_image: Image.Image) -> Image.Image:
-    """将小图片平铺到大图片上"""
-    w, h = small_image.size
-
-    for i in range(0, big_image.size[0], w):
-        for j in range(0, big_image.size[1], h):
-            big_image.paste(small_image, (i, j))
-
-    return big_image
+    def draw(
+        self, title: str, text: str, template: Union[Template, str, None] = None
+    ) -> BytesIO:
+        """绘制给定模板下指定标题与正文的图片并转换为 BytesIO"""
+        image = self.draw_img(title, text, template)
+        output = BytesIO()
+        image.save(output, "png")
+        return output
 
 
-def img2b64(img) -> str:
-    """图片转 base64"""
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    base64_str = "base64://" + b64encode(buf.getvalue()).decode()
-    return base64_str
+def tile_image(image: Image.Image, full_image: Image.Image) -> Image.Image:
+    """图片平铺"""
+    w, h = image.size
+    for i in range(0, full_image.size[0], w):
+        for j in range(0, full_image.size[1], h):
+            full_image.paste(image, (i, j))
+    return full_image

@@ -44,7 +44,7 @@ class Txt2Img:
         """文本内容自动换行"""
         font_config = self.template.get_content_font()
         font = ImageFont.truetype(font_config.font.as_posix(), font_config.size)
-        length_counter: int = 0
+        length_counter: float = 0
         text_result: str = ""
         # 处理文本
         for ch in content:
@@ -101,13 +101,13 @@ class Txt2Img:
                 title_font.size
                 + content_font.size  # title line space
                 + content_font.size * content_row_number
-                + (content_row_number - 1)
-                * (content_font.size // 2)  # content line space
+                + content_row_number * (content_font.size // 2)  # content line space
             )
         else:
-            text_total_height = content_font.size * content_row_number + (
-                content_row_number - 1
-            ) * (content_font.size // 2)
+            text_total_height = (
+                content_font.size * content_row_number
+                + content_row_number * (content_font.size // 2)
+            )
         # 创建画布
         output_image = Image.new(
             mode="RGBA",

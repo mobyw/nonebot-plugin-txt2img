@@ -16,9 +16,9 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.9"
 nonebot2 = {version = "^2.0.0", extras = ["fastapi", "httpx"]}
-nonebot-plugin-send-anything-anywhere = "^0.3.0"
-nonebot-plugin-localstore = "^0.5.1"
-pillow = "^10.0.0"
+nonebot-plugin-send-anything-anywhere = "^0.5.0"
+nonebot-plugin-localstore = "^0.6.0"
+pillow = "^10.2.0"
 pydantic = "^1.10.5"
 
 [tool.poetry.dev-dependencies]

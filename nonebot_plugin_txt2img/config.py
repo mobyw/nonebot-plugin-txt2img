@@ -13,7 +13,7 @@ default_image_file = plugin_image_dir / "mi_background.png"
 
 
 class Config(BaseModel, extra=Extra.ignore):
-    github_proxy: Optional[str] = "https://ghproxy.com"
+    github_proxy: Optional[str] = "https://mirror.ghproxy.com"
 
 
 plugin_config = Config(**get_driver().config.dict())
